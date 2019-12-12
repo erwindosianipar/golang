@@ -32,5 +32,5 @@ $ go install
 ```
 ## Debugging
 ```
-$ go run file.go
+$ go run file.go | $ go run .
 ```
