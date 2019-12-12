@@ -21,7 +21,9 @@ func main() {
 	// inisialisasi array secara vertikal
 	bahasa = [4]string{
 		"indonesia",
-		"inggris"
+		"inggris",
+		"inggris",
+		"inggris",
 	}
 
 	fmt.Println(bahasa)
