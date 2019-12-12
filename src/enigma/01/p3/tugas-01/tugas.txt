@@ -1,0 +1,14 @@
+Buatlah aplikasi sederhana dengan kriteria sebagai berikut:
+
+1. Aplikasi untuk menghitung luas dan keliling lingkaran
+    - aplikasi meminta input jari2 dari lingkaran
+    - setelah input dimasukkan, aplikasi akan menampilkan hasil
+      perhitungan luas dan keliling lingkaran
+2. Aplikasi untuk menghitung luas dan keliling persegi
+    - aplikasi meminta input panjang sisi persegi
+    - setelah input dimasukan, aplikasi akan menampilkan
+      hasil perhitungan luas dan keliling persegi
+3. Aplikasi untuk menghitung luas permukaan dan volume balok
+    - aplikasi meminta input p, l, dan t dari balok
+    - setelah input dimasukkan, aplikasi akan menampilkan hasil perhitungan luas permukaan
+    dan volume dari sebuah balok

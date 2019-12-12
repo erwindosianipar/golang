@@ -1,0 +1,4 @@
+Array
+
+Note:
+Array pada Golang tidak dapat menampung tipedata yang berbeda
