@@ -43,10 +43,11 @@ func main() {
 					fmt.Println("Hanya boleh diisi dengan PRIA atau WANITA")
 				}
 			}
+		} else {
+			fmt.Println("Error: batas tahun kelahiran adalah: 1950")
 		}
-
 	} else {
-		fmt.Println("Nama anda harus lebih dari 4 dan kurang dari 20 krakter")
+		fmt.Println("Error: nama harus lebih dari 4 dan kurang dari 20 krakter")
 	}
 }
 
