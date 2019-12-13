@@ -15,7 +15,7 @@ func main() {
 	}
 
 	var hasil int
-	var output, sim string
+	var sim string
 
 	for i := 2; i <= angka*2; i += 2 {
 		sim = ""
@@ -25,7 +25,7 @@ func main() {
 		fmt.Print(i, sim, " ")
 		hasil += i
 	}
-	fmt.Println(output, "=", hasil)
+	fmt.Println("=", hasil)
 
 	var hasil2 int
 	for k := 0; k < angka; k++ {
