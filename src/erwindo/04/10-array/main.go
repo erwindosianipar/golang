@@ -19,12 +19,12 @@ func main() {
 	fmt.Println(buah)
 
 	// inisialisasi array secara vertikal
-	bahasa = [4]string{
-		"indonesia",
-		"inggris",
-		"inggris",
-		"inggris",
+	var bahasaPemrograman = [4]string{
+		"Java",
+		"PHP",
+		"javaScript",
+		"Go Lang",
 	}
 
-	fmt.Println(bahasa)
+	fmt.Println(bahasaPemrograman)
 }
