@@ -20,9 +20,9 @@ func main() {
 	for i := 2; i <= angka*2; i += 2 {
 		sim = ""
 		if i < angka*2 {
-			sim = "+"
+			sim = " +"
 		}
-		output += fmt.Sprintf("%v %v ", i, sim)
+		fmt.Print(i, sim, " ")
 		hasil += i
 	}
 	fmt.Println(output, "=", hasil)
