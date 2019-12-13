@@ -27,8 +27,7 @@ func main() {
 		output += fmt.Sprintf("%v %v ", i, sim)
 		hasil += i
 	}
-	fmt.Printf(output)
-	fmt.Println("=", hasil)
+	fmt.Println(output, "=", hasil)
 
 	var hasil2 int
 	for k := 0; k < angka; k++ {
