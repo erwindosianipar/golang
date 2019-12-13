@@ -4,11 +4,9 @@ import "fmt"
 
 func main() {
 
-	kondisi := true
-
 	var angka int
 
-	for kondisi {
+	for {
 		fmt.Printf("Masukkan angka: ")
 		fmt.Scan(&angka)
 		if angka > -1 {
