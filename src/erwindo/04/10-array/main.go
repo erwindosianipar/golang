@@ -25,6 +25,10 @@ func main() {
 		"javaScript",
 		"Go Lang",
 	}
-
 	fmt.Println(bahasaPemrograman)
+
+	// array bersarang
+	var arr = [2][2]string{{"JavaScript", "React.Js"}, {"PHP", "CodeIgniter"}}
+
+	fmt.Println(arr)
 }
