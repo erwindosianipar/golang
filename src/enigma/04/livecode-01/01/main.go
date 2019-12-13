@@ -7,7 +7,7 @@ func main() {
 	var angka int
 
 	for {
-		fmt.Printf("Masukkan angka: ")
+		print("Masukkan angka: ")
 		fmt.Scan(&angka)
 		if angka > -1 {
 			break
