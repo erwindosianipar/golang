@@ -34,14 +34,12 @@ func main() {
 
 	// for range pada array jika range array ingin ditampung
 	for i, val := range ArrAngka2 {
-		fmt.Printf("array index ke %v nilainya %v", i, val)
-		fmt.Println()
+		fmt.Printf("array index ke %v nilainya %v\n", i, val)
 	}
 
 	// for _ range pada array digunakan jika program tidak memerlukan counter dicetak
 	for _, val := range ArrAngka2 {
-		fmt.Printf("nilainya %v", val)
-		fmt.Println()
+		fmt.Printf("nilainya %v\n", val)
 	}
 
 }
