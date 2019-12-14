@@ -4,7 +4,7 @@ import "fmt"
 
 func main() {
 
-	var arrAngka [6][4]int
+	var arrAngka [5][4]int
 
 	for i := 0; i < len(arrAngka); i++ {
 		for k := 0; k < len(arrAngka[0]); k++ {
