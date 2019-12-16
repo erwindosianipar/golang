@@ -1,1 +1,1 @@
-function expression
+function expression / anonim function
