@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	f "fmt"
 	"os"
 	rg "regexp"
@@ -24,7 +23,6 @@ func main() {
 		scanner := bufio.NewScanner(os.Stdin)
 		scanner.Scan()
 		angka = scanner.Text()
-		fmt.Println(angka)
 		if isInt.MatchString(s.TrimSpace(angka)) {
 			if len(s.TrimSpace(angka)) > 0 {
 				break
