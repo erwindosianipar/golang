@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	f "fmt"
+	"os"
 	rg "regexp"
 	sv "strconv"
 	s "strings"
@@ -18,13 +21,16 @@ func main() {
 
 	for {
 		f.Printf("Masukkan angka: ")
-		f.Scan(&angka)
-		if isInt.MatchString(angka) {
-			if len(angka) > 0 {
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Scan()
+		angka = scanner.Text()
+		fmt.Println(angka)
+		if isInt.MatchString(s.TrimSpace(angka)) {
+			if len(s.TrimSpace(angka)) > 0 {
 				break
 			}
 		}
-		f.Println("Error: inputan harus berupa angka")
+		f.Println("Error: inputan harus berupa angka, dan tidak mengandung spasi")
 	}
 
 	var sliceAngka = s.Split(angka, "")
