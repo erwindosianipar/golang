@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
+	f "fmt"
 	"os"
-	"regexp"
-	"strconv"
+	rg "regexp"
+	sc "strconv"
 )
 
 type dataMhs struct {
@@ -13,7 +13,7 @@ type dataMhs struct {
 	umurMhs    int
 }
 
-var isInt = regexp.MustCompile("^[0-9]+$")
+var isInt = rg.MustCompile("^[0-9]+$")
 
 var mhs1 = dataMhs{namaMhs: "", umurMhs: 0, jurusanMhs: ""}
 var mhs2 = dataMhs{namaMhs: "", umurMhs: 0, jurusanMhs: ""}
@@ -28,27 +28,27 @@ func main() {
 
 	var menu string
 
-	fmt.Println("--------------------------------------")
-	fmt.Println("Main Menu")
-	fmt.Println("--------------------------------------")
-	fmt.Println("1. Add Mahasiswa")
-	fmt.Println("2. Delete Mahasiswa")
-	fmt.Println("3. View Mahasiswa")
-	fmt.Println("4. Exit")
-	fmt.Println("--------------------------------------")
+	f.Println("--------------------------------------")
+	f.Println("Main Menu")
+	f.Println("--------------------------------------")
+	f.Println("1. Add Mahasiswa")
+	f.Println("2. Delete Mahasiswa")
+	f.Println("3. View Mahasiswa")
+	f.Println("4. Exit")
+	f.Println("--------------------------------------")
 
 	for {
-		fmt.Printf("Masukan menu yang dipilih: ")
-		fmt.Scan(&menu)
+		f.Printf("Masukan menu yang dipilih: ")
+		f.Scan(&menu)
 
 		if isInt.MatchString(menu) {
-			menu, _ := strconv.Atoi(menu)
+			menu, _ := sc.Atoi(menu)
 			if menu > 0 && menu < 5 {
 				break
 			}
 		}
 
-		fmt.Println("Error: menu salah!")
+		f.Println("Error: menu salah!")
 	}
 
 	switch menu {
@@ -61,7 +61,7 @@ func main() {
 	case "3":
 		lihatMhs()
 	case "4":
-		fmt.Println("Anda berhasil keluar dari aplikasi")
+		f.Println("Anda berhasil keluar dari aplikasi")
 		os.Exit(1)
 	}
 }
@@ -89,44 +89,44 @@ func totalMhs() int {
 func tambahMhs() {
 
 	if totalMhs() < 5 {
-		fmt.Println("--------------------------------------")
-		fmt.Println("Add Mahasiswa")
-		fmt.Println("--------------------------------------")
+		f.Println("--------------------------------------")
+		f.Println("Add Mahasiswa")
+		f.Println("--------------------------------------")
 
 		for {
-			fmt.Print("Nama (3-20 karakter) : ")
-			fmt.Scan(&nama)
+			f.Print("Nama (3-20 karakter) : ")
+			f.Scan(&nama)
 
 			if len(nama) > 2 && len(nama) < 21 {
 				break
 			}
-			fmt.Println("Error: nama harus 3-20 karakter")
+			f.Println("Error: nama harus 3-20 karakter")
 		}
 
 		for {
-			fmt.Printf("Umur (min 17 tahun)  : ")
-			fmt.Scan(&umur)
+			f.Printf("Umur (min 17 tahun)  : ")
+			f.Scan(&umur)
 			if umur > 16 {
 				break
 			}
-			fmt.Println("Error: umur minimal 17 tahun")
+			f.Println("Error: umur minimal 17 tahun")
 		}
 
 		for {
-			fmt.Printf("Jurusan (maks 10 karakter) : ")
-			fmt.Scan(&jurusan)
+			f.Printf("Jurusan (maks 10 karakter) : ")
+			f.Scan(&jurusan)
 
 			if len(jurusan) > 1 {
 				break
 			}
-			fmt.Println("Error: jurusan maksimal 10 karakter")
+			f.Println("Error: jurusan maksimal 10 karakter")
 		}
 
 		simpanMhs(nama, umur, jurusan)
 		return
 	}
 
-	fmt.Println("Error: data mahasiswa sudah penuh")
+	f.Println("Error: data mahasiswa sudah penuh")
 	return
 
 }
@@ -158,7 +158,7 @@ func simpanMhs(nama string, umur int, jurusan string) {
 func hapusMhs() {
 
 	if totalMhs() < 1 {
-		fmt.Println("Error: data mahasiswa masih kosong")
+		f.Println("Error: data mahasiswa masih kosong")
 	} else {
 		i := totalMhs()
 
@@ -184,10 +184,10 @@ func hapusMhs() {
 			mhs5.jurusanMhs = ""
 		}
 
-		fmt.Println()
-		fmt.Println("Success: data mahasiswa yang terakhir masuk berhasil dihapus")
-		fmt.Println(mhs1, mhs2, mhs3, mhs4, mhs5)
-		fmt.Println()
+		f.Println()
+		f.Println("Success: data mahasiswa yang terakhir masuk berhasil dihapus")
+		f.Println(mhs1, mhs2, mhs3, mhs4, mhs5)
+		f.Println()
 		return
 	}
 
@@ -196,22 +196,22 @@ func hapusMhs() {
 func lihatMhs() {
 
 	if totalMhs() > 0 {
-		fmt.Println("1.View by index")
-		fmt.Println("2.View all data")
+		f.Println("1.View by index")
+		f.Println("2.View all data")
 
 		var menu string
 		for {
-			fmt.Printf("Masukan menu yang dipilih: ")
-			fmt.Scan(&menu)
+			f.Printf("Masukan menu yang dipilih: ")
+			f.Scan(&menu)
 
 			if isInt.MatchString(menu) {
-				menu, _ := strconv.Atoi(menu)
+				menu, _ := sc.Atoi(menu)
 				if menu > 0 && menu < 3 {
 					break
 				}
 			}
 
-			fmt.Println("Error: menu yang anda masukkan salah")
+			f.Println("Error: menu yang anda masukkan salah")
 		}
 
 		switch menu {
@@ -223,7 +223,7 @@ func lihatMhs() {
 			main()
 		}
 	} else {
-		fmt.Println("Info: belum ada data mahasiswa")
+		f.Println("Info: belum ada data mahasiswa")
 	}
 
 }
@@ -233,30 +233,30 @@ func viewAllMhs() {
 	for i := 1; i <= totalMhs(); i++ {
 		switch i {
 		case 1:
-			fmt.Println(1)
-			fmt.Println("Nama:", mhs1.namaMhs)
-			fmt.Println("Umur:", mhs1.umurMhs)
-			fmt.Println("Jurusan:", mhs1.jurusanMhs)
+			f.Println(1)
+			f.Println("Nama:", mhs1.namaMhs)
+			f.Println("Umur:", mhs1.umurMhs)
+			f.Println("Jurusan:", mhs1.jurusanMhs)
 		case 2:
-			fmt.Println(2)
-			fmt.Println("Nama:", mhs2.namaMhs)
-			fmt.Println("Umur:", mhs2.umurMhs)
-			fmt.Println("Jurusan:", mhs2.jurusanMhs)
+			f.Println(2)
+			f.Println("Nama:", mhs2.namaMhs)
+			f.Println("Umur:", mhs2.umurMhs)
+			f.Println("Jurusan:", mhs2.jurusanMhs)
 		case 3:
-			fmt.Println(3)
-			fmt.Println("Nama:", mhs3.namaMhs)
-			fmt.Println("Umur:", mhs3.umurMhs)
-			fmt.Println("Jurusan:", mhs3.jurusanMhs)
+			f.Println(3)
+			f.Println("Nama:", mhs3.namaMhs)
+			f.Println("Umur:", mhs3.umurMhs)
+			f.Println("Jurusan:", mhs3.jurusanMhs)
 		case 4:
-			fmt.Println(4)
-			fmt.Println("Nama:", mhs4.namaMhs)
-			fmt.Println("Umur:", mhs4.umurMhs)
-			fmt.Println("Jurusan:", mhs4.jurusanMhs)
+			f.Println(4)
+			f.Println("Nama:", mhs4.namaMhs)
+			f.Println("Umur:", mhs4.umurMhs)
+			f.Println("Jurusan:", mhs4.jurusanMhs)
 		case 5:
-			fmt.Println(5)
-			fmt.Println("Nama:", mhs5.namaMhs)
-			fmt.Println("Umur:", mhs5.umurMhs)
-			fmt.Println("Jurusan:", mhs5.jurusanMhs)
+			f.Println(5)
+			f.Println("Nama:", mhs5.namaMhs)
+			f.Println("Umur:", mhs5.umurMhs)
+			f.Println("Jurusan:", mhs5.jurusanMhs)
 		}
 	}
 }
@@ -265,41 +265,41 @@ func viewByIndex() {
 
 	var index int
 	for {
-		fmt.Printf("Masukkan index yang ingin ditampilkan: ")
-		fmt.Scan(&index)
+		f.Printf("Masukkan index yang ingin ditampilkan: ")
+		f.Scan(&index)
 
 		if index == 1 {
-			fmt.Println(1)
-			fmt.Println("Nama:", mhs1.namaMhs)
-			fmt.Println("Umur:", mhs1.umurMhs)
-			fmt.Println("Jurusan:", mhs1.jurusanMhs)
+			f.Println(1)
+			f.Println("Nama:", mhs1.namaMhs)
+			f.Println("Umur:", mhs1.umurMhs)
+			f.Println("Jurusan:", mhs1.jurusanMhs)
 			return
 		} else if index == 2 {
-			fmt.Println(2)
-			fmt.Println("Nama:", mhs2.namaMhs)
-			fmt.Println("Umur:", mhs2.umurMhs)
-			fmt.Println("Jurusan:", mhs2.jurusanMhs)
+			f.Println(2)
+			f.Println("Nama:", mhs2.namaMhs)
+			f.Println("Umur:", mhs2.umurMhs)
+			f.Println("Jurusan:", mhs2.jurusanMhs)
 			return
 		} else if index == 3 {
-			fmt.Println(3)
-			fmt.Println("Nama:", mhs3.namaMhs)
-			fmt.Println("Umur:", mhs3.umurMhs)
-			fmt.Println("Jurusan:", mhs3.jurusanMhs)
+			f.Println(3)
+			f.Println("Nama:", mhs3.namaMhs)
+			f.Println("Umur:", mhs3.umurMhs)
+			f.Println("Jurusan:", mhs3.jurusanMhs)
 			return
 		} else if index == 4 {
-			fmt.Println(4)
-			fmt.Println("Nama:", mhs4.namaMhs)
-			fmt.Println("Umur:", mhs4.umurMhs)
-			fmt.Println("Jurusan:", mhs4.jurusanMhs)
+			f.Println(4)
+			f.Println("Nama:", mhs4.namaMhs)
+			f.Println("Umur:", mhs4.umurMhs)
+			f.Println("Jurusan:", mhs4.jurusanMhs)
 			return
 		} else if index == 5 {
-			fmt.Println(5)
-			fmt.Println("Nama:", mhs5.namaMhs)
-			fmt.Println("Umur:", mhs5.umurMhs)
-			fmt.Println("Jurusan:", mhs5.jurusanMhs)
+			f.Println(5)
+			f.Println("Nama:", mhs5.namaMhs)
+			f.Println("Umur:", mhs5.umurMhs)
+			f.Println("Jurusan:", mhs5.jurusanMhs)
 			return
 		} else {
-			fmt.Println("Error: anda memasukkan index yang salah")
+			f.Println("Error: anda memasukkan index yang salah")
 		}
 	}
 
