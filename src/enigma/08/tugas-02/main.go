@@ -66,6 +66,7 @@ func main() {
 
 	f.Printf("Robot kordinat (%v,%v), energi %v%%\n", bot.posX, bot.posY, bot.energi)
 	for {
+		f.Println("T: timur, B: barat, S: selatan, U: utara")
 		f.Printf("Masukkan perintah: ")
 		perintah = input()
 		if cekPerintah(perintah) {
