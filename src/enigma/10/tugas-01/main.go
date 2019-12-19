@@ -201,9 +201,9 @@ func viewByIndex() {
 			if index < totalMhs() {
 				f.Println()
 				f.Println(index)
-				f.Println("Nama:", mhs[index].namaMhs)
-				f.Println("Umur:", mhs[index].umurMhs)
-				f.Println("Jurusan:", mhs[index].jurusanMhs)
+				f.Println("Nama:", mhs[index])
+				f.Println("Umur:", mhs[index])
+				f.Println("Jurusan:", mhs[index])
 				f.Println()
 				break
 			} else {
