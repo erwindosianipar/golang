@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	f "fmt"
 	"os"
 	rg "regexp"
@@ -182,12 +181,12 @@ func lihatMhs() {
 
 func viewAllMhs() {
 	for i := 0; i < totalMhs(); i++ {
-		fmt.Println()
-		fmt.Println(i)
-		fmt.Println("Nama:", mhs[i].namaMhs)
-		fmt.Println("Umur:", mhs[i].umurMhs)
-		fmt.Println("Jurusan:", mhs[i].jurusanMhs)
-		fmt.Println()
+		f.Println()
+		f.Println(i)
+		f.Println("Nama:", mhs[i].namaMhs)
+		f.Println("Umur:", mhs[i].umurMhs)
+		f.Println("Jurusan:", mhs[i].jurusanMhs)
+		f.Println()
 	}
 }
 
