@@ -1,25 +1,22 @@
 package main
 
 import (
+	"fmt"
 	f "fmt"
 	"os"
 	rg "regexp"
 	sc "strconv"
 )
 
-type dataMhs struct {
-	namaMhs    string
-	jurusanMhs string
-	umurMhs    int
-}
-
 var isInt = rg.MustCompile("^[0-9]+$")
 
-var mhs1 = dataMhs{namaMhs: "", umurMhs: 0, jurusanMhs: ""}
-var mhs2 = dataMhs{namaMhs: "", umurMhs: 0, jurusanMhs: ""}
-var mhs3 = dataMhs{namaMhs: "", umurMhs: 0, jurusanMhs: ""}
-var mhs4 = dataMhs{namaMhs: "", umurMhs: 0, jurusanMhs: ""}
-var mhs5 = dataMhs{namaMhs: "", umurMhs: 0, jurusanMhs: ""}
+type dataMhs struct {
+	namaMhs    string
+	umurMhs    int
+	jurusanMhs string
+}
+
+var mhs []dataMhs
 
 var nama, jurusan string
 var umur int
@@ -67,23 +64,7 @@ func main() {
 }
 
 func totalMhs() int {
-	totalMhs := 0
-	if mhs1.namaMhs != "" {
-		totalMhs++
-	}
-	if mhs2.namaMhs != "" {
-		totalMhs++
-	}
-	if mhs3.namaMhs != "" {
-		totalMhs++
-	}
-	if mhs4.namaMhs != "" {
-		totalMhs++
-	}
-	if mhs5.namaMhs != "" {
-		totalMhs++
-	}
-	return totalMhs
+	return len(mhs)
 }
 
 func tambahMhs() {
@@ -132,26 +113,18 @@ func tambahMhs() {
 }
 
 func simpanMhs(nama string, umur int, jurusan string) {
-	if mhs1.namaMhs == "" {
-		mhs1.namaMhs = nama
-		mhs1.umurMhs = umur
-		mhs1.jurusanMhs = jurusan
-	} else if mhs2.namaMhs == "" {
-		mhs2.namaMhs = nama
-		mhs2.umurMhs = umur
-		mhs2.jurusanMhs = jurusan
-	} else if mhs3.namaMhs == "" {
-		mhs3.namaMhs = nama
-		mhs3.umurMhs = umur
-		mhs3.jurusanMhs = jurusan
-	} else if mhs4.namaMhs == "" {
-		mhs4.namaMhs = nama
-		mhs4.umurMhs = umur
-		mhs4.jurusanMhs = jurusan
-	} else if mhs5.namaMhs == "" {
-		mhs5.namaMhs = nama
-		mhs5.umurMhs = umur
-		mhs5.jurusanMhs = jurusan
+	if len(mhs) < 5 {
+		mhs = append(mhs, dataMhs{
+			namaMhs:    nama,
+			umurMhs:    umur,
+			jurusanMhs: jurusan,
+		})
+
+		f.Println()
+		f.Println("Success: data mahasiswa berhasil ditambah")
+		f.Println(mhs)
+		f.Println()
+		return
 	}
 }
 
@@ -161,32 +134,11 @@ func hapusMhs() {
 		f.Println("Error: data mahasiswa masih kosong")
 	} else {
 		i := totalMhs()
-
-		if i == 1 {
-			mhs1.namaMhs = ""
-			mhs1.umurMhs = 0
-			mhs1.jurusanMhs = ""
-		} else if i == 2 {
-			mhs2.namaMhs = ""
-			mhs2.umurMhs = 0
-			mhs2.jurusanMhs = ""
-		} else if i == 3 {
-			mhs3.namaMhs = ""
-			mhs3.umurMhs = 0
-			mhs3.jurusanMhs = ""
-		} else if i == 4 {
-			mhs4.namaMhs = ""
-			mhs4.umurMhs = 0
-			mhs4.jurusanMhs = ""
-		} else if i == 5 {
-			mhs5.namaMhs = ""
-			mhs5.umurMhs = 0
-			mhs5.jurusanMhs = ""
-		}
+		mhs = mhs[:i-1]
 
 		f.Println()
 		f.Println("Success: data mahasiswa yang terakhir masuk berhasil dihapus")
-		f.Println(mhs1, mhs2, mhs3, mhs4, mhs5)
+		f.Println(mhs)
 		f.Println()
 		return
 	}
@@ -229,78 +181,36 @@ func lihatMhs() {
 }
 
 func viewAllMhs() {
-
-	for i := 1; i <= totalMhs(); i++ {
-		switch i {
-		case 1:
-			f.Println(1)
-			f.Println("Nama:", mhs1.namaMhs)
-			f.Println("Umur:", mhs1.umurMhs)
-			f.Println("Jurusan:", mhs1.jurusanMhs)
-		case 2:
-			f.Println(2)
-			f.Println("Nama:", mhs2.namaMhs)
-			f.Println("Umur:", mhs2.umurMhs)
-			f.Println("Jurusan:", mhs2.jurusanMhs)
-		case 3:
-			f.Println(3)
-			f.Println("Nama:", mhs3.namaMhs)
-			f.Println("Umur:", mhs3.umurMhs)
-			f.Println("Jurusan:", mhs3.jurusanMhs)
-		case 4:
-			f.Println(4)
-			f.Println("Nama:", mhs4.namaMhs)
-			f.Println("Umur:", mhs4.umurMhs)
-			f.Println("Jurusan:", mhs4.jurusanMhs)
-		case 5:
-			f.Println(5)
-			f.Println("Nama:", mhs5.namaMhs)
-			f.Println("Umur:", mhs5.umurMhs)
-			f.Println("Jurusan:", mhs5.jurusanMhs)
-		}
+	for i := 0; i < totalMhs(); i++ {
+		fmt.Println()
+		fmt.Println(i)
+		fmt.Println("Nama:", mhs[i].namaMhs)
+		fmt.Println("Umur:", mhs[i].umurMhs)
+		fmt.Println("Jurusan:", mhs[i].jurusanMhs)
+		fmt.Println()
 	}
 }
 
 func viewByIndex() {
-
-	var index int
+	var index string
 	for {
 		f.Printf("Masukkan index yang ingin ditampilkan: ")
 		f.Scan(&index)
 
-		if index == 1 {
-			f.Println(1)
-			f.Println("Nama:", mhs1.namaMhs)
-			f.Println("Umur:", mhs1.umurMhs)
-			f.Println("Jurusan:", mhs1.jurusanMhs)
-			return
-		} else if index == 2 {
-			f.Println(2)
-			f.Println("Nama:", mhs2.namaMhs)
-			f.Println("Umur:", mhs2.umurMhs)
-			f.Println("Jurusan:", mhs2.jurusanMhs)
-			return
-		} else if index == 3 {
-			f.Println(3)
-			f.Println("Nama:", mhs3.namaMhs)
-			f.Println("Umur:", mhs3.umurMhs)
-			f.Println("Jurusan:", mhs3.jurusanMhs)
-			return
-		} else if index == 4 {
-			f.Println(4)
-			f.Println("Nama:", mhs4.namaMhs)
-			f.Println("Umur:", mhs4.umurMhs)
-			f.Println("Jurusan:", mhs4.jurusanMhs)
-			return
-		} else if index == 5 {
-			f.Println(5)
-			f.Println("Nama:", mhs5.namaMhs)
-			f.Println("Umur:", mhs5.umurMhs)
-			f.Println("Jurusan:", mhs5.jurusanMhs)
-			return
-		} else {
-			f.Println("Error: anda memasukkan index yang salah")
+		if isInt.MatchString(index) {
+			index, _ := sc.Atoi(index)
+			if index < totalMhs() {
+				f.Println()
+				f.Println(index)
+				f.Println("Nama:", mhs[index])
+				f.Println("Umur:", mhs[index])
+				f.Println("Jurusan:", mhs[index])
+				f.Println()
+				break
+			} else {
+				f.Println("Error: data mahasiswa tidak ada")
+			}
 		}
+		f.Println("Error: anda memasukkan index yang salah")
 	}
-
 }
