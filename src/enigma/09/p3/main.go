@@ -2,52 +2,52 @@ package main
 
 import "fmt"
 
-type Bentuk interface {
+type bentuk interface {
 	getLuas() float32
 	getKeliling() float32
 }
 
-type Kotak struct {
+type kotak struct {
 	panjang float32
 	lebar   float32
 }
 
-func (k Kotak) getLuas() float32 {
+func (k kotak) getLuas() float32 {
 	return k.panjang * k.lebar
 }
 
-func (k Kotak) getKeliling() float32 {
+func (k kotak) getKeliling() float32 {
 	return (k.panjang + k.lebar) * 2
 }
 
-func (k *Kotak) tambahLebar() {
+func (k *kotak) tambahLebar() {
 	k.lebar++
 }
 
-type Persegi struct {
+type persegi struct {
 	sisi float32
 }
 
-func (p Persegi) getLuas() float32 {
+func (p persegi) getLuas() float32 {
 	return p.sisi * p.sisi
 }
 
-func (p Persegi) getKeliling() float32 {
+func (p persegi) getKeliling() float32 {
 	return p.sisi * 4
 }
 
 func main() {
 
-	var k = Kotak{5, 7}
+	var k = kotak{5, 7}
 	fmt.Println("Luas K :", k.getLuas())
 	fmt.Println("Keliling K :", k.getKeliling())
 
-	var b Bentuk
+	var b bentuk
 	b = k
 	fmt.Println("Luas B :", b.getLuas())
 	fmt.Println("Keliling B :", b.getKeliling())
 
-	var p = Persegi{10}
+	var p = persegi{10}
 	fmt.Println("Luas P :", p.getLuas())
 	fmt.Println("Keliling P :", p.getKeliling())
 
