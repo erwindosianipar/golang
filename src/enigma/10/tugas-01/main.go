@@ -1,7 +1,9 @@
 package main
 
 import (
-	f "fmt"
+	"bufio"
+	"encoding/json"
+	"fmt"
 	"os"
 	rg "regexp"
 	sc "strconv"
@@ -10,9 +12,9 @@ import (
 var isInt = rg.MustCompile("^[0-9]+$")
 
 type dataMhs struct {
-	namaMhs    string
-	umurMhs    int
-	jurusanMhs string
+	NamaMhs    string `json:"nama"`
+	UmurMhs    int    `json:"umur"`
+	JurusanMhs string `json:"jurusan"`
 }
 
 var mhs []dataMhs
@@ -20,22 +22,24 @@ var mhs []dataMhs
 var nama, jurusan string
 var umur int
 
+var path = "mahasiswa.json"
+
 func main() {
 
 	var menu string
 
-	f.Println("--------------------------------------")
-	f.Println("Main Menu")
-	f.Println("--------------------------------------")
-	f.Println("1. Add Mahasiswa")
-	f.Println("2. Delete Mahasiswa")
-	f.Println("3. View Mahasiswa")
-	f.Println("4. Exit")
-	f.Println("--------------------------------------")
+	fmt.Println("--------------------------------------")
+	fmt.Println("Main Menu")
+	fmt.Println("--------------------------------------")
+	fmt.Println("1. Add Mahasiswa")
+	fmt.Println("2. Delete Mahasiswa")
+	fmt.Println("3. View Mahasiswa")
+	fmt.Println("4. Exit")
+	fmt.Println("--------------------------------------")
 
 	for {
-		f.Printf("Masukan menu yang dipilih: ")
-		f.Scan(&menu)
+		fmt.Printf("Masukan menu yang dipilih: ")
+		fmt.Scan(&menu)
 
 		if isInt.MatchString(menu) {
 			menu, _ := sc.Atoi(menu)
@@ -44,7 +48,7 @@ func main() {
 			}
 		}
 
-		f.Println("Error: menu salah!")
+		fmt.Println("Error: menu salah!")
 	}
 
 	switch menu {
@@ -56,90 +60,99 @@ func main() {
 		main()
 	case "3":
 		lihatMhs()
+		main()
 	case "4":
-		f.Println("Anda berhasil keluar dari aplikasi")
-		os.Exit(1)
+		fmt.Println("Anda berhasil keluar dari aplikasi")
+		os.Exit(0)
 	}
-}
-
-func totalMhs() int {
-	return len(mhs)
 }
 
 func tambahMhs() {
 
 	if totalMhs() < 5 {
-		f.Println("--------------------------------------")
-		f.Println("Add Mahasiswa")
-		f.Println("--------------------------------------")
+		fmt.Println("--------------------------------------")
+		fmt.Println("Add Mahasiswa")
+		fmt.Println("--------------------------------------")
 
 		for {
-			f.Print("Nama (3-20 karakter) : ")
-			f.Scan(&nama)
+			fmt.Print("Nama (3-20 karakter) : ")
+			fmt.Scan(&nama)
 
 			if len(nama) > 2 && len(nama) < 21 {
 				break
 			}
-			f.Println("Error: nama harus 3-20 karakter")
+			fmt.Println("Error: nama harus 3-20 karakter")
 		}
 
 		for {
-			f.Printf("Umur (min 17 tahun)  : ")
-			f.Scan(&umur)
+			fmt.Printf("Umur (min 17 tahun)  : ")
+			fmt.Scan(&umur)
 			if umur > 16 {
 				break
 			}
-			f.Println("Error: umur minimal 17 tahun")
+			fmt.Println("Error: umur minimal 17 tahun")
 		}
 
 		for {
-			f.Printf("Jurusan (maks 10 karakter) : ")
-			f.Scan(&jurusan)
+			fmt.Printf("Jurusan (maks 10 karakter) : ")
+			fmt.Scan(&jurusan)
 
 			if len(jurusan) > 1 {
 				break
 			}
-			f.Println("Error: jurusan maksimal 10 karakter")
+			fmt.Println("Error: jurusan maksimal 10 karakter")
 		}
 
 		simpanMhs(nama, umur, jurusan)
 		return
 	}
 
-	f.Println("Error: data mahasiswa sudah penuh")
+	fmt.Println("Error: data mahasiswa sudah penuh")
 	return
 
 }
 
-func simpanMhs(nama string, umur int, jurusan string) {
-	if len(mhs) < 5 {
-		mhs = append(mhs, dataMhs{
-			namaMhs:    nama,
-			umurMhs:    umur,
-			jurusanMhs: jurusan,
-		})
+func totalMhs() int {
+	data := readFile()
+	if data == "" {
+		return 0
+	}
+	total := jsonDecode(readFile())
+	return len(total)
+}
 
-		f.Println()
-		f.Println("Success: data mahasiswa berhasil ditambah")
-		f.Println(mhs)
-		f.Println()
-		return
+func simpanMhs(nama string, umur int, jurusan string) {
+	if totalMhs() < 5 {
+		var file, _ = os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
+		defer file.Close()
+		data := readFile()
+		mhs = jsonDecode(readFile())
+		if data != "[]" && data != "" {
+			mhs = append(mhs, dataMhs{NamaMhs: nama, UmurMhs: umur, JurusanMhs: jurusan})
+			file.WriteString(jsonEncode(mhs))
+		} else {
+			var mhs = []dataMhs{{nama, umur, jurusan}}
+			file.WriteString(jsonEncode(mhs))
+		}
+		fmt.Println()
+		fmt.Println("Success: data mahasiswa berhasil ditambah")
+		fmt.Println()
 	}
 }
 
 func hapusMhs() {
-
 	if totalMhs() < 1 {
-		f.Println("Error: data mahasiswa masih kosong")
+		fmt.Println("Error: data mahasiswa masih kosong")
 	} else {
-		i := totalMhs()
-		mhs = mhs[:i-1]
+		dataStruct := jsonDecode(readFile())
+		data := jsonEncode(dataStruct[:totalMhs()-1])
 
-		f.Println()
-		f.Println("Success: data mahasiswa yang terakhir masuk berhasil dihapus")
-		f.Println(mhs)
-		f.Println()
-		return
+		os.Remove(path)
+		var file, _ = os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
+		defer file.Close()
+		file.WriteString(data)
+		fmt.Println()
+		fmt.Println("Success: data mahasiswa yang terakhir masuk berhasil dihapus")
 	}
 
 }
@@ -147,13 +160,13 @@ func hapusMhs() {
 func lihatMhs() {
 
 	if totalMhs() > 0 {
-		f.Println("1.View by index")
-		f.Println("2.View all data")
+		fmt.Println("1.View by index")
+		fmt.Println("2.View all data")
 
 		var menu string
 		for {
-			f.Printf("Masukan menu yang dipilih: ")
-			f.Scan(&menu)
+			fmt.Printf("Masukan menu yang dipilih: ")
+			fmt.Scan(&menu)
 
 			if isInt.MatchString(menu) {
 				menu, _ := sc.Atoi(menu)
@@ -162,7 +175,7 @@ func lihatMhs() {
 				}
 			}
 
-			f.Println("Error: menu yang anda masukkan salah")
+			fmt.Println("Error: menu yang anda masukkan salah")
 		}
 
 		switch menu {
@@ -174,42 +187,77 @@ func lihatMhs() {
 			main()
 		}
 	} else {
-		f.Println("Info: belum ada data mahasiswa")
+		fmt.Println("Info: belum ada data mahasiswa")
 	}
 
 }
 
 func viewAllMhs() {
+	dataStruct := jsonDecode(readFile())
 	for i := 0; i < totalMhs(); i++ {
-		f.Println()
-		f.Println(i)
-		f.Println("Nama:", mhs[i].namaMhs)
-		f.Println("Umur:", mhs[i].umurMhs)
-		f.Println("Jurusan:", mhs[i].jurusanMhs)
-		f.Println()
+		fmt.Println()
+		fmt.Println(i)
+		fmt.Println("Nama:", dataStruct[i].NamaMhs)
+		fmt.Println("Umur:", dataStruct[i].UmurMhs)
+		fmt.Println("Jurusan:", dataStruct[i].JurusanMhs)
+		fmt.Println()
 	}
 }
 
 func viewByIndex() {
+	dataStruct := jsonDecode(readFile())
 	var index string
 	for {
-		f.Printf("Masukkan index yang ingin ditampilkan: ")
-		f.Scan(&index)
+		fmt.Printf("Masukkan index yang ingin ditampilkan: ")
+		fmt.Scan(&index)
 
 		if isInt.MatchString(index) {
 			index, _ := sc.Atoi(index)
 			if index < totalMhs() {
-				f.Println()
-				f.Println(index)
-				f.Println("Nama:", mhs[index])
-				f.Println("Umur:", mhs[index])
-				f.Println("Jurusan:", mhs[index])
-				f.Println()
+				fmt.Println()
+				fmt.Println(index)
+				fmt.Println("Nama:", dataStruct[index].NamaMhs)
+				fmt.Println("Umur:", dataStruct[index].UmurMhs)
+				fmt.Println("Jurusan:", dataStruct[index].JurusanMhs)
+				fmt.Println()
 				break
 			} else {
-				f.Println("Error: data mahasiswa tidak ada")
+				fmt.Println("Error: data mahasiswa tidak ada")
 			}
 		}
-		f.Println("Error: anda memasukkan index yang salah")
+		fmt.Println("Error: anda memasukkan index yang salah")
 	}
+}
+
+func readFile() string {
+	var text string
+	var file, _ = os.OpenFile(path, os.O_RDONLY, 0644)
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		text += scanner.Text()
+	}
+	if text != "[]" && text != "" {
+		return text
+	}
+	return ""
+}
+
+func jsonEncode(data []dataMhs) string {
+	var jsonData, err = json.MarshalIndent(data, "", "    ")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	var jsonString = string(jsonData)
+	return jsonString
+}
+
+func jsonDecode(data string) []dataMhs {
+	var user []dataMhs
+	var jsonData = []byte(data)
+	var err = json.Unmarshal(jsonData, &user)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	return user
 }
