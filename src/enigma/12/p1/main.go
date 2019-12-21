@@ -11,6 +11,15 @@ func main() {
 	fmt.Println("World")
 
 	routine()
+	cetak("Hello")
+	cetak("World")
+}
+
+func cetak(str string) {
+	for i := 0; i < 5; i++ {
+		fmt.Println(str)
+		time.Sleep(1 * time.Second)
+	}
 }
 
 func routine() {
