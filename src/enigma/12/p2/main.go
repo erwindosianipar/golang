@@ -14,7 +14,7 @@ func cetak(str string, delay int) {
 
 func main() {
 	cetak("1", 100)
-	cetak("2", 300)
+	go cetak("2", 300)
 	cetak("3", 100)
 	cetak("4", 100)
 }
