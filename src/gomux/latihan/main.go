@@ -4,12 +4,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"gomux/p1/middleware"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
 )
 
 type stPeople struct {
@@ -36,32 +37,6 @@ func connect() (*sql.DB, error) {
 	}
 
 	return db, nil
-}
-
-func main() {
-	port := "8080"
-
-	http.HandleFunc("/student", getStudentHandler)
-	http.HandleFunc("/students", getStudentsHandler)
-
-	fmt.Printf("Starting web server at http://localhost:%v/student\n", port)
-	fmt.Printf("Starting web server at http://localhost:%v/students", port)
-
-	err := http.ListenAndServe(":"+port, nil)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func getStudentsHandler(res http.ResponseWriter, req *http.Request) {
-	if req.Method == "GET" {
-		getAllStudents(res, req)
-	} else {
-		res.WriteHeader(http.StatusMethodNotAllowed)
-		res.Write([]byte(req.Method + " method is not supported"))
-		return
-	}
 }
 
 func getAllStudents(res http.ResponseWriter, req *http.Request) {
@@ -100,29 +75,6 @@ func getAllStudents(res http.ResponseWriter, req *http.Request) {
 
 	res.Header().Set("Content-type", "application/json")
 	res.Write(json)
-}
-
-func getStudentHandler(res http.ResponseWriter, req *http.Request) {
-
-	id := req.FormValue("id")
-	ID, _ := strconv.Atoi(id)
-
-	nama := req.FormValue("nama")
-	gender := req.FormValue("gender")
-
-	if req.Method == "POST" {
-		insertStudent(res, req)
-	} else if req.Method == "GET" {
-		getStudentByID(ID, res)
-	} else if req.Method == "PUT" {
-		updateStudentByID(ID, nama, gender, res)
-	} else if req.Method == "DELETE" {
-		deleteStudentByID(ID, res)
-	} else {
-		res.WriteHeader(http.StatusMethodNotAllowed)
-		res.Write([]byte(req.Method + " method is not supported"))
-		return
-	}
 }
 
 func insertStudent(res http.ResponseWriter, req *http.Request) {
@@ -167,7 +119,9 @@ func savedStudentToDatabase() {
 	}
 }
 
-func getStudentByID(ID int, res http.ResponseWriter) {
+func getStudentByID(res http.ResponseWriter, req *http.Request) {
+	pathVer := mux.Vars(req)
+
 	db, err := connect()
 
 	if err != nil {
@@ -179,7 +133,7 @@ func getStudentByID(ID int, res http.ResponseWriter) {
 
 	var resp = stPeople{}
 
-	err = db.QueryRow("select id, nama, gender from peoples where id = (?) group by id", ID).Scan(&resp.ID, &resp.Nama, &resp.Gender)
+	err = db.QueryRow("select id, nama, gender from peoples where id = (?) group by id", pathVer["id"]).Scan(&resp.ID, &resp.Nama, &resp.Gender)
 
 	if err == sql.ErrNoRows {
 		res.WriteHeader(http.StatusNotFound)
@@ -200,8 +154,14 @@ func getStudentByID(ID int, res http.ResponseWriter) {
 	res.Write(json)
 }
 
-func updateStudentByID(ID int, nama, gender string, res http.ResponseWriter) {
-	if ID == 0 && nama == "" && gender == "" {
+func updateStudentByID(res http.ResponseWriter, req *http.Request) {
+	pathVer := mux.Vars(req)
+
+	ID := pathVer["id"]
+	nama := pathVer["nama"]
+	gender := pathVer["gender"]
+
+	if ID == "" && nama == "" && gender == "" {
 		res.WriteHeader(http.StatusBadRequest)
 		res.Write([]byte("Oops, something went wrong."))
 		return
@@ -229,8 +189,10 @@ func updateStudentByID(ID int, nama, gender string, res http.ResponseWriter) {
 	}
 }
 
-func deleteStudentByID(ID int, res http.ResponseWriter) {
-	if ID == 0 {
+func deleteStudentByID(res http.ResponseWriter, req *http.Request) {
+	pathVer := mux.Vars(req)
+
+	if pathVer["id"] == "" {
 		res.WriteHeader(http.StatusBadRequest)
 		res.Write([]byte("Oops, something went wrong."))
 		return
@@ -247,7 +209,7 @@ func deleteStudentByID(ID int, res http.ResponseWriter) {
 
 	rowID := 0
 
-	err1 := db.QueryRow("select id from peoples where id = ?", ID).Scan(&rowID)
+	err1 := db.QueryRow("select id from peoples where id = ?", pathVer["id"]).Scan(&rowID)
 
 	if err1 == sql.ErrNoRows {
 		res.WriteHeader(http.StatusNotFound)
@@ -255,9 +217,27 @@ func deleteStudentByID(ID int, res http.ResponseWriter) {
 		return
 	}
 
-	_, err = db.Exec("delete from peoples where id = ?", ID)
+	_, err = db.Exec("delete from peoples where id = ?", pathVer["id"])
 
 	if err != nil {
 		log.Fatal(err.Error())
+	}
+}
+
+func main() {
+	port := "8080"
+
+	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/students", getAllStudents).Methods(http.MethodGet)
+	router.HandleFunc("/student", insertStudent).Methods(http.MethodPost)
+	router.HandleFunc("/student/{id}", getStudentByID).Methods(http.MethodGet)
+	router.HandleFunc("/student/{id}/{nama}/{gender}", updateStudentByID).Methods(http.MethodPut)
+	router.HandleFunc("/student/{id}", deleteStudentByID).Methods(http.MethodDelete)
+
+	router.Use(middleware.Logger) //middleware all
+
+	err := http.ListenAndServe(":"+port, router)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
