@@ -396,7 +396,7 @@ func main() {
 	router.HandleFunc("/insertTransaksi", insertTransaksiPostHandler).Methods(http.MethodPost)
 	router.HandleFunc("/closeMeja/{id}", closeMejaGetHandler).Methods(http.MethodGet)
 
-	fmt.Println("Web server starting at port:", port)
+	fmt.Printf("Web server started at http://localhost:%v/hello", port)
 
 	router.Use(middleware.Logger)
 
