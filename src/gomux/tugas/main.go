@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -21,10 +22,6 @@ func connect() (*sql.DB, error) {
 	}
 
 	return db, nil
-}
-
-func helloGetHandler(res http.ResponseWriter, req *http.Request) {
-	res.Write([]byte(req.Method + " helloGetHandler"))
 }
 
 type Menu struct {
@@ -57,6 +54,48 @@ type Transaksi struct {
 
 var stTransaksi []Transaksi
 var stPesanan []Pesanan
+
+type MenuOrdered struct {
+	Nama  string
+	Qty   int
+	Harga int
+	Total int
+}
+
+type Bill struct {
+	MejaID     int
+	Menus      []MenuOrdered
+	GrandTotal int
+}
+
+var stMenuOrdered []MenuOrdered
+var stBill []Bill
+
+type Error struct {
+	Error   bool
+	Message string
+	Data    interface{}
+}
+
+var jsonError Error
+
+func respondWithError(w http.ResponseWriter, status int, error Error) {
+	w.Header().Set("Content-Type", "application/json")
+	responseJSON(w, status, error)
+}
+
+func responseJSON(w http.ResponseWriter, status int, data interface{}) {
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(data)
+}
+
+func helloGetHandler(res http.ResponseWriter, req *http.Request) {
+	jsonError.Error = false
+	jsonError.Message = "Sukses"
+	jsonError.Data = "Sukses merender /hello"
+
+	respondWithError(res, http.StatusInternalServerError, jsonError)
+}
 
 func listMenuGetHandler(res http.ResponseWriter, req *http.Request) {
 	db, err := connect()
@@ -135,15 +174,21 @@ func listMejaGetHandler(res http.ResponseWriter, req *http.Request) {
 		stMeja = append(stMeja, each)
 	}
 
-	json, err := json.Marshal(stMeja)
+	// json, err := json.Marshal(stMeja)
 
 	if err != nil {
 		fmt.Println("[listMejaGetHandler] Error: when marshal stMeja to json: ", err.Error())
 		return
 	}
 
-	res.Header().Set("Content-type", "application/json")
-	res.Write(json)
+	// res.Header().Set("Content-type", "application/json")
+	// res.Write(json)
+
+	jsonError.Error = false
+	jsonError.Message = "Sukses"
+	jsonError.Data = stMeja
+
+	respondWithError(res, http.StatusInternalServerError, jsonError)
 }
 
 func openMejaPutHandler(res http.ResponseWriter, req *http.Request) {
@@ -185,14 +230,19 @@ func openMejaPutHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res.Write([]byte("Sukses: meja berhasil dipesan"))
+	jsonError.Error = false
+	jsonError.Message = "Sukses: meja berhasil dipesan"
+	jsonError.Data = nil
+
+	respondWithError(res, http.StatusInternalServerError, jsonError)
+	// res.Write([]byte("Sukses: meja berhasil dipesan"))
 }
 
-func insertTransaksi(res http.ResponseWriter, req *http.Request) {
+func insertTransaksiPostHandler(res http.ResponseWriter, req *http.Request) {
 	reqBody, err := ioutil.ReadAll(req.Body)
 
 	if err != nil {
-		fmt.Println("[insertTransaksi] Error: when ioutil reading", err.Error())
+		fmt.Println("[insertTransaksiPostHandler] Error: when ioutil reading", err.Error())
 		return
 	}
 
@@ -200,14 +250,20 @@ func insertTransaksi(res http.ResponseWriter, req *http.Request) {
 	err = json.Unmarshal(reqBody, &std)
 
 	if err != nil {
-		fmt.Println("[insertTransaksi] Error: when unmarshal stTransaksi", err.Error())
+		fmt.Println("[insertTransaksiPostHandler] Error: when unmarshal stTransaksi", err.Error())
 		return
 	}
 
-	insertToDB(std[0].MejaID, std[0].Notes, std)
+	insertToDB(std[0].MejaID, std[0].Notes, std[0].Pesan)
+
+	jsonError.Error = false
+	jsonError.Message = "Sukses: Pesanan berhasil dibuat"
+	jsonError.Data = nil
+
+	respondWithError(res, http.StatusInternalServerError, jsonError)
 }
 
-func insertToDB(ID int, notes string, std []Transaksi) {
+func insertToDB(ID int, notes string, pesanan []Pesanan) {
 	db, err := connect()
 
 	if err != nil {
@@ -230,7 +286,7 @@ func insertToDB(ID int, notes string, std []Transaksi) {
 
 	if err != nil {
 		tx.Rollback()
-		fmt.Println("[insertToDB] Error: when get insert transaction to database", err.Error())
+		fmt.Println("[insertToDB] Error: when insert transaction to database", err.Error())
 		return
 	}
 
@@ -242,8 +298,8 @@ func insertToDB(ID int, notes string, std []Transaksi) {
 		return
 	}
 
-	for i := 0; i < len(std[0].Pesan); i++ {
-		_, err := tx.Exec("insert into pesanan (transaksi_id, menu_id, qty) values (?, ?, ?)", id, std[0].Pesan[i].MenuID, std[0].Pesan[i].Qty)
+	for i := 0; i < len(pesanan); i++ {
+		_, err := tx.Exec("insert into pesanan (transaksi_id, menu_id, qty) values (?, ?, ?)", id, pesanan[i].MenuID, pesanan[i].Qty)
 
 		if err != nil {
 			tx.Rollback()
@@ -258,6 +314,75 @@ func insertToDB(ID int, notes string, std []Transaksi) {
 		fmt.Println("[insertToDB] Error: when get commit database", err.Error())
 		return
 	}
+
+	return
+}
+
+func closeMejaGetHandler(res http.ResponseWriter, req *http.Request) {
+	db, err := connect()
+
+	if err != nil {
+		fmt.Println("[closeMejaGetHandler] Error: when connect to database:", err.Error())
+		return
+	}
+
+	defer db.Close()
+
+	pathVar := mux.Vars(req)
+	ID, _ := strconv.Atoi(pathVar["id"])
+
+	rows, err := db.Query("select nama, qty, harga, qty*harga as total from pesanan ps join menu mn join transaksi tr on ps.menu_id = mn.id and ps.transaksi_id = tr.id where tr.id = ?", ID)
+
+	if err != nil {
+		fmt.Println("[closeMejaGetHandler] Error: when query select:", err.Error())
+		return
+	}
+
+	_, err = db.Exec("update meja set status = 'close' where id = ?", ID)
+	if err != nil {
+		fmt.Println("[closeMejaGetHandler] Error: when query update status meja:", err.Error())
+		return
+	}
+
+	defer rows.Close()
+
+	stMenuOrdered = nil
+	stBill = nil
+
+	for rows.Next() {
+		var each = MenuOrdered{}
+		var err = rows.Scan(&each.Nama, &each.Qty, &each.Harga, &each.Total)
+
+		if err != nil {
+			fmt.Println("[listMejaGetHandler] Error: when scaning rows from table meja:", err.Error())
+			return
+		}
+
+		stMenuOrdered = append(stMenuOrdered, each)
+	}
+
+	grandTotal := 0
+
+	db.QueryRow("select sum(qty*harga) as grandTotal from pesanan ps join menu mn join transaksi tr on ps.menu_id = mn.id and ps.transaksi_id = tr.id where tr.id = ?", ID).Scan(&grandTotal)
+
+	stBill = append(stBill, Bill{MejaID: ID, Menus: stMenuOrdered, GrandTotal: grandTotal})
+
+	// json, err := json.Marshal(stBill)
+
+	if err != nil {
+		fmt.Println("[listMejaGetHandler] Error: when marshal stBill to json: ", err.Error())
+		return
+	}
+
+	// res.Header().Set("Content-type", "application/json")
+	// res.Write(json)
+
+	jsonError.Error = false
+	jsonError.Message = "Success: Transaksi selesai"
+	jsonError.Data = stBill
+
+	respondWithError(res, http.StatusInternalServerError, jsonError)
+
 }
 
 func main() {
@@ -268,7 +393,10 @@ func main() {
 	router.HandleFunc("/listMenu", listMenuGetHandler).Methods(http.MethodGet)
 	router.HandleFunc("/listMeja", listMejaGetHandler).Methods(http.MethodGet)
 	router.HandleFunc("/openMeja/{id}", openMejaPutHandler).Methods(http.MethodPut)
-	router.HandleFunc("/insertTransaksi", insertTransaksi).Methods(http.MethodPost)
+	router.HandleFunc("/insertTransaksi", insertTransaksiPostHandler).Methods(http.MethodPost)
+	router.HandleFunc("/closeMeja/{id}", closeMejaGetHandler).Methods(http.MethodGet)
+
+	fmt.Println("Web server starting at port:", port)
 
 	router.Use(middleware.Logger)
 
