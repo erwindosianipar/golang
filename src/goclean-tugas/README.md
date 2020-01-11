@@ -1,3 +1,63 @@
+# Go API Aplikasi pemesanan restoran
+
+## Using Postman
+
+`http://localhost:8080/`
+
+### See List of Table/Meja
+
+Method: `GET`
+URL: `http://localhost:8080/meja/list`
+
+### See List of Menu
+
+Method: `GET`
+URL: `http://localhost:8080/menu/list`
+
+### Open a table for order
+
+Method: `PUT`
+URL: `http://localhost:8080/meja/1`
+
+**Param** is a number for mejaID
+
+### Insert or Make a Order/Transaction
+
+Method: `POST`
+URL: `http://localhost:8080/transaksi`
+
+**Body**
+
+```
+[
+    {
+        "MejaID" : 1,
+        "Notes" : "Nasinya pedas dan teh tidak terlalu manis.",
+        "Pesan" :
+        [
+            {
+                "MenuID" : 1,
+                "Qty": 2,
+            },
+            {
+                "MenuID" : 2,
+                "Qty": 2,
+            }
+        ] 
+    }
+]
+```
+
+### Create a Billing or Close a Table
+
+Method: `PUT`
+URL: `http://localhost:8080/transaksi/1`
+
+**Param** is a number for Transaksi ID
+
+## Database Query
+
+```
 create database restoran;
 
 use restoran;
@@ -52,3 +112,4 @@ select * from meja;
 select * from menu;
 select * from transaksi;
 select * from pesanan;
+```
