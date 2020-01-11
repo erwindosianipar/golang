@@ -55,3 +55,9 @@ insert into meja (status) VALUES
 ('open'), ('open');
 
 select * from meja;
+
+select nama, qty, harga, qty*harga as total from pesanan ps join menu mn join transaksi tr
+on ps.menu_id = mn.id and ps.transaksi_id = tr.id where tr.meja_id = 3;
+
+select sum(qty*harga) as grandTotal from pesanan ps join menu mn join transaksi tr
+on ps.menu_id = mn.id and ps.transaksi_id = tr.id where tr.meja_id = 3;

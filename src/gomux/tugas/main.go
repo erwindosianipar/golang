@@ -24,6 +24,7 @@ func connect() (*sql.DB, error) {
 	return db, nil
 }
 
+// Menu struct adalah xxxx
 type Menu struct {
 	ID    int
 	Nama  string
@@ -33,6 +34,7 @@ type Menu struct {
 var stMenu []Menu
 var slMenu = Menu{}
 
+// Meja adalah aaaaaa
 type Meja struct {
 	ID     int
 	Status string
@@ -41,11 +43,13 @@ type Meja struct {
 var stMeja []Meja
 var slMeja = Meja{}
 
+// Pesanan adalah aaaaa
 type Pesanan struct {
 	MenuID int
 	Qty    int
 }
 
+// Transaksi adalah aaaaa
 type Transaksi struct {
 	MejaID int
 	Notes  string
@@ -55,6 +59,7 @@ type Transaksi struct {
 var stTransaksi []Transaksi
 var stPesanan []Pesanan
 
+// MenuOrdered adalah
 type MenuOrdered struct {
 	Nama  string
 	Qty   int
@@ -62,6 +67,7 @@ type MenuOrdered struct {
 	Total int
 }
 
+// Bill adalah aaaa
 type Bill struct {
 	MejaID     int
 	Menus      []MenuOrdered
@@ -71,6 +77,7 @@ type Bill struct {
 var stMenuOrdered []MenuOrdered
 var stBill []Bill
 
+// Error adalah aaaa
 type Error struct {
 	Error   bool
 	Message string
@@ -94,7 +101,7 @@ func helloGetHandler(res http.ResponseWriter, req *http.Request) {
 	jsonError.Message = "Sukses"
 	jsonError.Data = "Sukses merender /hello"
 
-	respondWithError(res, http.StatusInternalServerError, jsonError)
+	respondWithError(res, http.StatusOK, jsonError)
 }
 
 func listMenuGetHandler(res http.ResponseWriter, req *http.Request) {
@@ -130,15 +137,21 @@ func listMenuGetHandler(res http.ResponseWriter, req *http.Request) {
 		stMenu = append(stMenu, each)
 	}
 
-	json, err := json.Marshal(stMenu)
+	//json, err := json.Marshal(stMenu)
 
 	if err != nil {
 		fmt.Println("[listMenuGetHandler] Error: when marshal stMenu to json: ", err.Error())
 		return
 	}
 
-	res.Header().Set("Content-type", "application/json")
-	res.Write(json)
+	// res.Header().Set("Content-type", "application/json")
+	// res.Write(json)
+
+	jsonError.Error = false
+	jsonError.Message = "Sukses"
+	jsonError.Data = stMenu
+
+	respondWithError(res, http.StatusOK, jsonError)
 }
 
 func listMejaGetHandler(res http.ResponseWriter, req *http.Request) {
@@ -188,7 +201,7 @@ func listMejaGetHandler(res http.ResponseWriter, req *http.Request) {
 	jsonError.Message = "Sukses"
 	jsonError.Data = stMeja
 
-	respondWithError(res, http.StatusInternalServerError, jsonError)
+	respondWithError(res, http.StatusOK, jsonError)
 }
 
 func openMejaPutHandler(res http.ResponseWriter, req *http.Request) {
@@ -207,13 +220,26 @@ func openMejaPutHandler(res http.ResponseWriter, req *http.Request) {
 		QueryRow("select status from meja where id = ?", pathVar["id"]).
 		Scan(&status)
 
+	if err == sql.ErrNoRows {
+		jsonError.Error = true
+		jsonError.Message = "Error: nomor meja yang anda pesan tidak tersedia"
+		jsonError.Data = nil
+
+		respondWithError(res, http.StatusInternalServerError, jsonError)
+		return
+	}
+
 	if err != nil {
 		fmt.Println("[openMejaPutHandler] Error: when select status meja:", err.Error())
 		return
 	}
 
 	if status == "open" {
-		res.Write([]byte("Oops, meja yang anda pesan tidak tersedia"))
+		jsonError.Error = true
+		jsonError.Message = "Error: meja telah dipesan sebelumnya"
+		jsonError.Data = nil
+
+		respondWithError(res, http.StatusInternalServerError, jsonError)
 		return
 	}
 
@@ -234,15 +260,24 @@ func openMejaPutHandler(res http.ResponseWriter, req *http.Request) {
 	jsonError.Message = "Sukses: meja berhasil dipesan"
 	jsonError.Data = nil
 
-	respondWithError(res, http.StatusInternalServerError, jsonError)
+	respondWithError(res, http.StatusOK, jsonError)
 	// res.Write([]byte("Sukses: meja berhasil dipesan"))
 }
 
 func insertTransaksiPostHandler(res http.ResponseWriter, req *http.Request) {
+	db, err := connect()
+
+	if err != nil {
+		fmt.Println("[insertToDB] Error: when connect to database", err.Error())
+		return
+	}
+
+	defer db.Close()
+
 	reqBody, err := ioutil.ReadAll(req.Body)
 
 	if err != nil {
-		fmt.Println("[insertTransaksiPostHandler] Error: when ioutil reading", err.Error())
+		fmt.Println("[insertTransaksi] Error: when ioutil reading", err.Error())
 		return
 	}
 
@@ -250,20 +285,46 @@ func insertTransaksiPostHandler(res http.ResponseWriter, req *http.Request) {
 	err = json.Unmarshal(reqBody, &std)
 
 	if err != nil {
-		fmt.Println("[insertTransaksiPostHandler] Error: when unmarshal stTransaksi", err.Error())
+		fmt.Println("[insertTransaksi] Error: when unmarshal stTransaksi", err.Error())
 		return
 	}
 
-	insertToDB(std[0].MejaID, std[0].Notes, std[0].Pesan)
+	meja := 0
+	_ = db.QueryRow("select count(*) as ada from meja where id = ?", std[0].MejaID).Scan(&meja)
 
-	jsonError.Error = false
-	jsonError.Message = "Sukses: Pesanan berhasil dibuat"
-	jsonError.Data = nil
+	if meja < 1 {
+		jsonError.Error = true
+		jsonError.Message = "Error: MejaID tidak ditemukan"
+		jsonError.Data = nil
 
-	respondWithError(res, http.StatusInternalServerError, jsonError)
+		respondWithError(res, http.StatusOK, jsonError)
+		return
+	}
+
+	insertToDB(res, std[0].MejaID, std[0].Notes, std[0].Pesan)
 }
 
-func insertToDB(ID int, notes string, pesanan []Pesanan) {
+func cekAdaMenuID(menuID int) bool {
+	db, err := connect()
+
+	if err != nil {
+		fmt.Println("[insertToDB] Error: when connect to database", err.Error())
+		return false
+	}
+
+	defer db.Close()
+
+	id := 0
+	err = db.QueryRow("select id from menu where id = ?", menuID).Scan(id)
+
+	if err == sql.ErrNoRows {
+		return false
+	}
+
+	return true
+}
+
+func insertToDB(resp http.ResponseWriter, MejaID int, notes string, pesanan []Pesanan) {
 	db, err := connect()
 
 	if err != nil {
@@ -282,11 +343,11 @@ func insertToDB(ID int, notes string, pesanan []Pesanan) {
 
 	currentTime := time.Now()
 
-	res, err := tx.Exec("insert into transaksi (meja_id, tanggal, notes) values (?, ?, ?)", ID, currentTime.Format("2006-01-02 15:04:05"), notes)
+	res, err := tx.Exec("insert into transaksi (meja_id, tanggal, notes) values (?, ?, ?)", MejaID, currentTime.Format("2006-01-02 15:04:05"), notes)
 
 	if err != nil {
 		tx.Rollback()
-		fmt.Println("[insertToDB] Error: when insert transaction to database", err.Error())
+		fmt.Println("[insertToDB] Error: when get insert transaction to database", err.Error())
 		return
 	}
 
@@ -299,6 +360,17 @@ func insertToDB(ID int, notes string, pesanan []Pesanan) {
 	}
 
 	for i := 0; i < len(pesanan); i++ {
+		adaMenu := cekAdaMenuID(pesanan[i].MenuID)
+
+		if adaMenu == false {
+			jsonError.Error = true
+			jsonError.Message = "Error: terdapat MenuID yang tidak terdaftar"
+			jsonError.Data = nil
+
+			respondWithError(resp, http.StatusInternalServerError, jsonError)
+			return
+		}
+
 		_, err := tx.Exec("insert into pesanan (transaksi_id, menu_id, qty) values (?, ?, ?)", id, pesanan[i].MenuID, pesanan[i].Qty)
 
 		if err != nil {
@@ -314,15 +386,13 @@ func insertToDB(ID int, notes string, pesanan []Pesanan) {
 		fmt.Println("[insertToDB] Error: when get commit database", err.Error())
 		return
 	}
-
-	return
 }
 
-func closeMejaGetHandler(res http.ResponseWriter, req *http.Request) {
+func closeTransaksiGetHandler(res http.ResponseWriter, req *http.Request) {
 	db, err := connect()
 
 	if err != nil {
-		fmt.Println("[closeMejaGetHandler] Error: when connect to database:", err.Error())
+		fmt.Println("[closeTransaksiGetHandler] Error: when connect to database:", err.Error())
 		return
 	}
 
@@ -331,16 +401,28 @@ func closeMejaGetHandler(res http.ResponseWriter, req *http.Request) {
 	pathVar := mux.Vars(req)
 	ID, _ := strconv.Atoi(pathVar["id"])
 
+	id := 0
+	getIDTrx := db.QueryRow("select id from transaksi where id = ?", ID).Scan(&id)
+
+	if getIDTrx == sql.ErrNoRows {
+		jsonError.Error = true
+		jsonError.Message = "Error: ID transaksi tidak ditemukan"
+		jsonError.Data = nil
+
+		respondWithError(res, http.StatusOK, jsonError)
+		return
+	}
+
 	rows, err := db.Query("select nama, qty, harga, qty*harga as total from pesanan ps join menu mn join transaksi tr on ps.menu_id = mn.id and ps.transaksi_id = tr.id where tr.id = ?", ID)
 
 	if err != nil {
-		fmt.Println("[closeMejaGetHandler] Error: when query select:", err.Error())
+		fmt.Println("[closeTransaksiGetHandler] Error: when query select:", err.Error())
 		return
 	}
 
 	_, err = db.Exec("update meja set status = 'close' where id = ?", ID)
 	if err != nil {
-		fmt.Println("[closeMejaGetHandler] Error: when query update status meja:", err.Error())
+		fmt.Println("[closeTransaksiGetHandler] Error: when query update status meja:", err.Error())
 		return
 	}
 
@@ -354,7 +436,7 @@ func closeMejaGetHandler(res http.ResponseWriter, req *http.Request) {
 		var err = rows.Scan(&each.Nama, &each.Qty, &each.Harga, &each.Total)
 
 		if err != nil {
-			fmt.Println("[listMejaGetHandler] Error: when scaning rows from table meja:", err.Error())
+			fmt.Println("[closeTransaksiGetHandler] Error: when scaning rows from table meja:", err.Error())
 			return
 		}
 
@@ -363,14 +445,16 @@ func closeMejaGetHandler(res http.ResponseWriter, req *http.Request) {
 
 	grandTotal := 0
 
-	db.QueryRow("select sum(qty*harga) as grandTotal from pesanan ps join menu mn join transaksi tr on ps.menu_id = mn.id and ps.transaksi_id = tr.id where tr.id = ?", ID).Scan(&grandTotal)
+	err = db.
+		QueryRow("select sum(qty*harga) as grandTotal from pesanan ps join menu mn join transaksi tr on ps.menu_id = mn.id and ps.transaksi_id = tr.id where tr.id = ?", ID).
+		Scan(&grandTotal)
 
 	stBill = append(stBill, Bill{MejaID: ID, Menus: stMenuOrdered, GrandTotal: grandTotal})
 
 	// json, err := json.Marshal(stBill)
 
 	if err != nil {
-		fmt.Println("[listMejaGetHandler] Error: when marshal stBill to json: ", err.Error())
+		fmt.Println("[closeTransaksiGetHandler] Error: when marshal stBill to json: ", err.Error())
 		return
 	}
 
@@ -381,8 +465,8 @@ func closeMejaGetHandler(res http.ResponseWriter, req *http.Request) {
 	jsonError.Message = "Success: Transaksi selesai"
 	jsonError.Data = stBill
 
-	respondWithError(res, http.StatusInternalServerError, jsonError)
-
+	respondWithError(res, http.StatusOK, jsonError)
+	return
 }
 
 func main() {
@@ -394,7 +478,7 @@ func main() {
 	router.HandleFunc("/listMeja", listMejaGetHandler).Methods(http.MethodGet)
 	router.HandleFunc("/openMeja/{id}", openMejaPutHandler).Methods(http.MethodPut)
 	router.HandleFunc("/insertTransaksi", insertTransaksiPostHandler).Methods(http.MethodPost)
-	router.HandleFunc("/closeMeja/{id}", closeMejaGetHandler).Methods(http.MethodGet)
+	router.HandleFunc("/closeTransaksi/{id}", closeTransaksiGetHandler).Methods(http.MethodGet)
 
 	fmt.Printf("Web server started at http://localhost:%v/hello", port)
 
