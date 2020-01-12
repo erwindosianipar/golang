@@ -1,7 +1,7 @@
 package model
 
-// Meja handler
+// Meja is representation of Restaurant Table
 type Meja struct {
-	ID    int
-	Nomor int
+	ID     int
+	Status string
 }

@@ -9,16 +9,15 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 
-	mejaHandler "goclean/meja/handler"
-	"goclean/meja/repo"
-	"goclean/meja/usecase"
-	menuHandler "goclean/menu/handler"
-	"goclean/middleware"
+	kapalHandler "api-pelabuhan/kapal/handler"
+	"api-pelabuhan/kapal/repo"
+	"api-pelabuhan/kapal/usecase"
+	"api-pelabuhan/middleware"
 )
 
 func main() {
 	port := "8080"
-	conStr := "root:P@ssw0rd@tcp(127.0.0.1:3306)/turing"
+	conStr := "root:erwindo123@tcp(127.0.0.1:3306)/pelabuhan"
 
 	db, err := sql.Open("mysql", conStr)
 	if err != nil {
@@ -28,11 +27,10 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 
-	mejaRepo := repo.CreateMejaRepoMysqlImpl(db)
-	mejaUsecase := usecase.CreateMejaUsecase(mejaRepo)
+	kapalRepo := repo.CreateKapalRepoMysqlImpl(db)
+	kapalUsecase := usecase.CreateKapalUsecase(kapalRepo)
 
-	mejaHandler.CreateMejaHandler(router, mejaUsecase)
-	menuHandler.CreateMenuHandler(router)
+	kapalHandler.CreateKapalHandler(router, kapalUsecase)
 
 	router.Use(middleware.Logger)
 
