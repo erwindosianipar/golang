@@ -17,6 +17,10 @@ import (
 	dockRepo "api-pelabuhan/dock/repo"
 	dockUsecase "api-pelabuhan/dock/usecase"
 
+	dockedHandler "api-pelabuhan/docked/handler"
+	dockedRepo "api-pelabuhan/docked/repo"
+	dockedUsecase "api-pelabuhan/docked/usecase"
+
 	"api-pelabuhan/middleware"
 )
 
@@ -39,6 +43,10 @@ func main() {
 	dockRepo := dockRepo.CreateDockRepoMysqlImpl(db)
 	dockUsecase := dockUsecase.CreateDockUsecase(dockRepo)
 	dockHandler.CreateDockHandler(router, dockUsecase)
+
+	dockedRepo := dockedRepo.CreateDockedRepoMysqlImpl(db)
+	dockedUsecase := dockedUsecase.CreateDocedkUsecase(dockRepo)
+	dockedHandler.CreateDockedHandler(router, dockedUsecase)
 
 	router.Use(middleware.Logger)
 
