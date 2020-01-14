@@ -59,18 +59,6 @@ func (m *KapalHandler) insertKapal(resp http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	if kapal.Status == "" {
-		library.HandleError(resp, "Oops, (Status) Kapal Must Exist and Cannot be Empty.")
-		return
-	}
-
-	if kapal.Status != "berlayar" {
-		if kapal.Status != "bersandar" {
-			library.HandleError(resp, "Oops, (Status) Kapal Must be (berlayar or bersandar).")
-			return
-		}
-	}
-
 	err = m.kapalUsecase.InsertKapal(&kapal)
 	if err != nil {
 		library.HandleError(resp, "Oops, Something Went Wrong. Please Try Again.")
@@ -100,6 +88,11 @@ func (m *KapalHandler) updateKapal(resp http.ResponseWriter, req *http.Request) 
 
 	kapalID, err := m.kapalUsecase.GetKapalByID(kapal.ID)
 
+	if kapal.ID == 0 {
+		library.HandleError(resp, "Oops, (ID) Kapal Must Exist and Cannot be Empty.")
+		return
+	}
+
 	if kapalID == nil {
 		library.HandleError(resp, "Oops, No Data Kapal to Update with ID kapal You Request.")
 		return
@@ -113,18 +106,6 @@ func (m *KapalHandler) updateKapal(resp http.ResponseWriter, req *http.Request) 
 	if kapal.Muatan == 0 {
 		library.HandleError(resp, "Oops, (Muatan) Kapal Must Be Exist.")
 		return
-	}
-
-	if kapal.Status == "" {
-		library.HandleError(resp, "Oops, (Status) Kapal Must Exist and Cannot be Empty.")
-		return
-	}
-
-	if kapal.Status != "berlayar" {
-		if kapal.Status != "bersandar" {
-			library.HandleError(resp, "Oops, (Status) Kapal Must be (berlayar or bersandar).")
-			return
-		}
 	}
 
 	err = m.kapalUsecase.UpdateKapal(&kapal)

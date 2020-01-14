@@ -61,8 +61,8 @@ func (m *KapalRepoMysqlImpl) InsertKapal(kapal *model.Kapal) error {
 		return fmt.Errorf("[MejaRepoMysqlImpl.InsertKapal] Error when begin transaction : %w", err)
 	}
 
-	query := "INSERT INTO kapal (kode, muatan, status, is_delete) VALUES (?, ?, ?, ?)"
-	_, err = m.db.Exec(query, kapal.Kode, kapal.Muatan, kapal.Status, 0)
+	query := "INSERT INTO kapal (kode, muatan) VALUES (?, ?)"
+	_, err = m.db.Exec(query, kapal.Kode, kapal.Muatan)
 	if err != nil {
 		tx.Rollback()
 		return fmt.Errorf("[MejaRepoMysqlImpl.InsertKapal] Error when running query insert kapal: %w", err)
@@ -103,9 +103,9 @@ func (m *KapalRepoMysqlImpl) DeleteKapal(id int) error {
 
 // UpdateKapal is aaa
 func (m *KapalRepoMysqlImpl) UpdateKapal(kapal *model.Kapal) error {
-	query := "UPDATE kapal SET kode = ?, muatan = ?, status = ? WHERE id = ?"
+	query := "UPDATE kapal SET kode = ?, muatan = ? WHERE id = ?"
 
-	_, err := m.db.Exec(query, kapal.Kode, kapal.Muatan, kapal.Status, kapal.ID)
+	_, err := m.db.Exec(query, kapal.Kode, kapal.Muatan, kapal.ID)
 
 	if err != nil {
 		return fmt.Errorf("[KapalRepoMysqlImpl.UpdateKapal] Error when update kapal: %w", err)

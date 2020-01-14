@@ -10,8 +10,13 @@ import (
 	"github.com/gorilla/mux"
 
 	kapalHandler "api-pelabuhan/kapal/handler"
-	"api-pelabuhan/kapal/repo"
-	"api-pelabuhan/kapal/usecase"
+	kapalRepo "api-pelabuhan/kapal/repo"
+	kapalUsecase "api-pelabuhan/kapal/usecase"
+
+	dockHandler "api-pelabuhan/dock/handler"
+	dockRepo "api-pelabuhan/dock/repo"
+	dockUsecase "api-pelabuhan/dock/usecase"
+
 	"api-pelabuhan/middleware"
 )
 
@@ -27,10 +32,13 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 
-	kapalRepo := repo.CreateKapalRepoMysqlImpl(db)
-	kapalUsecase := usecase.CreateKapalUsecase(kapalRepo)
-
+	kapalRepo := kapalRepo.CreateKapalRepoMysqlImpl(db)
+	kapalUsecase := kapalUsecase.CreateKapalUsecase(kapalRepo)
 	kapalHandler.CreateKapalHandler(router, kapalUsecase)
+
+	dockRepo := dockRepo.CreateDockRepoMysqlImpl(db)
+	dockUsecase := dockUsecase.CreateDockUsecase(dockRepo)
+	dockHandler.CreateDockHandler(router, dockUsecase)
 
 	router.Use(middleware.Logger)
 
