@@ -53,4 +53,6 @@ insert into song (genre_id, artist_id, name) values
 (2, 4, 'Disco Lazy Time'),
 (1, 4, 'Diatas awan');
 
-
+select * from artist;
+select * from genre;
+select * from song;
