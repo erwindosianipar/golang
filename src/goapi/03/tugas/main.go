@@ -193,8 +193,7 @@ func getStudentByID(ID int, res http.ResponseWriter) {
 	}
 
 	people = nil
-	people = append(people, stPeople{ID: resp.ID, Nama: resp.Nama, Gender: resp.Gender})
-	json, err := json.Marshal(people)
+	json, err := json.Marshal(resp)
 
 	res.Header().Set("Content-type", "application/json")
 	res.Write(json)
