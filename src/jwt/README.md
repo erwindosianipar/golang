@@ -51,6 +51,6 @@ $ go get github.com/dgrijalva/jwt-go
 
 | Method | URL |
 | ------ | --- |
-| POST | http://localhost:8000/user |
+| GET | http://localhost:8000/user |
 
 *Attach a token with type **bearer** in authorization.*
