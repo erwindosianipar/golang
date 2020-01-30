@@ -1,0 +1,10 @@
+CREATE DATABASE jwt;
+
+USE jwt;
+
+CREATE TABLE user {
+    id INT NOT NULL AUTO_INCREMENT,
+    email VARCHAR(20) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id)
+}
